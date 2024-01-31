@@ -4,23 +4,27 @@ namespace InMemoryScheduler
 {
     public static class Scheduler
     {
+        private static Executor executor = new Executor();
+
         public static Job BuildJob(string name, bool singleExecution, TimeSpan timeSpan , Action jobToBeExecuted)
         {
-            var job = new Job();
-            job.Id = new Guid();
-            job.SingleExecution = singleExecution;
-            job.Stop = false;
-            job.Start = false;
-            job.Name = name;
-            job.TimeIntervalOfExecution = timeSpan;
-            job.ScheduledJob = new Job.JobToBeExecuted(jobToBeExecuted);
+            var job = new Job
+            {
+                Id = new Guid(),
+                SingleExecution = singleExecution,
+                Stop = false,
+                Start = false,
+                Name = name,
+                TimeIntervalOfExecution = timeSpan,
+                ScheduledJob = new Job.JobToBeExecuted(jobToBeExecuted)
+            };
 
             return job;
         }
 
         public static void AddJob(Job job)
         {
-
+            executor.AddJob(job);
         }
 
         public static void RemoveJob(int id)

@@ -5,3 +5,6 @@ using InMemoryScheduler.Models;
 Console.WriteLine("Hello, World!");
 
 Job job = Scheduler.BuildJob("JobTest", true, TimeSpan.FromSeconds(60) , () => Console.WriteLine("test"));
+Scheduler.AddJob(job);
+
+Console.ReadLine();
