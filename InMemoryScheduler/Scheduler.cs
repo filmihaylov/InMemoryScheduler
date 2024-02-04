@@ -6,14 +6,14 @@ namespace InMemoryScheduler
     {
         private static Executor executor = new Executor();
 
-        public static Job BuildJob(string name, bool singleExecution, TimeSpan timeSpan , Action jobToBeExecuted)
+        public static Job BuildJob(string name, bool singleExecution, TimeSpan timeSpan, Action jobToBeExecuted)
         {
             var job = new Job
             {
                 Id = new Guid(),
                 SingleExecution = singleExecution,
                 Stop = false,
-                Start = false,
+                StartImediate = false,
                 Name = name,
                 TimeIntervalOfExecution = timeSpan,
                 ScheduledJob = new Job.JobToBeExecuted(jobToBeExecuted)
@@ -27,9 +27,9 @@ namespace InMemoryScheduler
             executor.AddJob(job);
         }
 
-        public static void RemoveJob(int id)
+        public static void RemoveJob(Job job)
         {
-
+            job.Stop = true;
         }
 
     }

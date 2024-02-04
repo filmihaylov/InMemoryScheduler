@@ -9,55 +9,48 @@ namespace InMemoryScheduler
 {
     internal class Executor
     {
-        private IList<Job> jobs;
         private Queue<Job> jobsQue;
+        private Task runnerTask;
 
         public Executor()
         {
-            this.jobs = new List<Job>();
             this.jobsQue = new Queue<Job>();
-            this.runner().Start();
+            this.runnerTask = this.runner();
+            runnerTask.Start();
         }
 
         public void AddJob(Job job)
         {
-            jobs.Add(job);
             jobsQue.Enqueue(job);
-        }
-
-        public void RemoveJob(Job job)
-        {
-            jobs.Remove(job);
         }
 
         private Task runner()
         {
-            var runnerTask = new Task(() => { 
-            while (true)
-                {
-                    foreach (var job in jobsQue) {
-
-                        if (jobs.Contains(job))
+            var runnerTask = new Task(() =>
+            {
+                while (true)
+                {       if(jobsQue.Count == 0)
                         {
-                            var jobManager = new JobsManager(job);
-                            if (jobManager.checkIfJobIsReadyForExecution())
-                            {
-                                Task.Run(() => {
-
-                                    if (job.ScheduledJob != null)
-                                        job.ScheduledJob();
-                                   
-                                    });
-                            }
-                            
+                        continue;
                         }
-                        
-                    }
+                        var job = jobsQue.Dequeue();
+                        if (job.delete)
+                        {
+                        continue;
+                        }
+                        jobsQue.Enqueue(job);
+                        var jobManager = new JobsManager(job);
+                        if (jobManager.CheckIfJobIsReadyForExecution())
+                        {
+                            Task.Run(() =>
+                            {
 
+                                if (job.ScheduledJob != null)
+                                    job.ScheduledJob();
+
+                            });
+                        }
                 }
-            
-            
-            
             });
 
             return runnerTask;
