@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace InMemoryScheduler
 {
@@ -11,6 +12,7 @@ namespace InMemoryScheduler
     {
         private Queue<Job> jobsQue;
         private Task runnerTask;
+        public ILogger? logger { get; set; }
 
         public Executor()
         {
@@ -29,27 +31,38 @@ namespace InMemoryScheduler
             var runnerTask = new Task(() =>
             {
                 while (true)
-                {       if(jobsQue.Count == 0)
-                        {
+                {
+                    Thread.Sleep(1000);
+                    if (jobsQue.Count == 0)
+                    {
                         continue;
-                        }
-                        var job = jobsQue.Dequeue();
-                        if (job.delete)
-                        {
+                    }
+                    var job = jobsQue.Dequeue();
+                    if (job.delete)
+                    {
                         continue;
-                        }
-                        jobsQue.Enqueue(job);
-                        var jobManager = new JobsManager(job);
-                        if (jobManager.CheckIfJobIsReadyForExecution())
+                    }
+                    jobsQue.Enqueue(job);
+                    var jobManager = new JobsManager(job);
+                    if (jobManager.CheckIfJobIsReadyForExecution())
+                    {
+                        Task.Run(() =>
                         {
-                            Task.Run(() =>
+                            try
                             {
-
                                 if (job.ScheduledJob != null)
                                     job.ScheduledJob();
+                            }
+                            catch (Exception ex)
+                            {
+                                if (logger != null)
+                                {
+                                    logger.LogError($"Job Name : {job.Name} , Job Id : {job.Id} Exception Message: " + ex.ToString());
+                                }
+                            }
 
-                            });
-                        }
+                        });
+                    }
                 }
             });
 

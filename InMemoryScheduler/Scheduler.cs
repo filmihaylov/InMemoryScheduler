@@ -1,10 +1,17 @@
 ﻿using InMemoryScheduler.Models;
+using Microsoft.Extensions.Logging;
 
 namespace InMemoryScheduler
 {
     public static class Scheduler
     {
+
         private static Executor executor = new Executor();
+
+        public static void SetLogger(ILogger logger)
+        {
+            executor.logger = logger;
+        }
 
         public static Job BuildJob(string name, bool singleExecution, TimeSpan timeSpan, Action jobToBeExecuted)
         {
